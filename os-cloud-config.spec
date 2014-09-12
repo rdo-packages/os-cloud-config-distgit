@@ -10,6 +10,7 @@ Source0:		http://tarballs.openstack.org/%{name}/%{name}-%{version}.tar.gz
 BuildArch:		noarch
 BuildRequires:		python-setuptools
 BuildRequires:		python2-devel
+BuildRequires:		python-pbr
 
 Requires:		python-setuptools
 Requires:		python-argparse
@@ -44,6 +45,9 @@ configuration of OpenStack clouds.
 %{_bindir}/setup-neutron
 
 %changelog
+* Fri Sep 12 2014 James Slagle <jslagle@redhat.com> - 0.1.8-3
+- Add python-pbr to BuildRequires
+
 * Fri Sep 05 2014 James Slagle <jslagle@redhat.com> - 0.1.8-2
 - Updating spec for Fedora review process
 
