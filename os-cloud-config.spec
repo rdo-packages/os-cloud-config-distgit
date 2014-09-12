@@ -1,6 +1,6 @@
 Name:			os-cloud-config
-Version:		0.1.8
-Release:		2%{?dist}
+Version:		0.1.9
+Release:		1%{?dist}
 Summary:		Configuration for OpenStack clouds
 
 License:		ASL 2.0
@@ -28,6 +28,10 @@ configuration of OpenStack clouds.
 %prep
 %setup -q -n %{name}-%{version}
 
+#
+# patches_base: 0.1.9
+#
+
 %build
 %{__python} setup.py build
 
@@ -45,6 +49,10 @@ configuration of OpenStack clouds.
 %{_bindir}/setup-neutron
 
 %changelog
+* Fri Sep 12 2014 James Slagle <jslagle@redhat.com> - 0.1.9-1
+- Setup for rdopkg
+- Bump to 0.1.9
+
 * Fri Sep 12 2014 James Slagle <jslagle@redhat.com> - 0.1.8-3
 - Add python-pbr to BuildRequires
 
