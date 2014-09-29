@@ -20,7 +20,8 @@ Requires:		python-oslo-config
 Requires:		python-babel
 Requires:		python-keystoneclient
 Requires:		python-novaclient
-Requires:		python-ironicclient
+# Add Back Requires on python-ironicclient once it's actually available
+# Requires:		python-ironicclient
 Requires:		pyOpenSSL
 
 %description
