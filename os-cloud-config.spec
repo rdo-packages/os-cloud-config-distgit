@@ -1,11 +1,13 @@
 Name:			os-cloud-config
-Version:		0.1.9
+Version:		0.1.10
 Release:		1%{?dist}
 Summary:		Configuration for OpenStack clouds
 
 License:		ASL 2.0
 URL:			http://pypi.python.org/pypi/%{name}
 Source0:		http://tarballs.openstack.org/%{name}/%{name}-%{version}.tar.gz
+
+Patch0001: 0001-Do-not-create-the-_member_-role.patch
 
 BuildArch:		noarch
 BuildRequires:		python-setuptools
@@ -28,6 +30,8 @@ configuration of OpenStack clouds.
 %prep
 %setup -q -n %{name}-%{version}
 
+%patch0001 -p1
+
 #
 # patches_base: 0.1.9
 #
@@ -49,6 +53,9 @@ configuration of OpenStack clouds.
 %{_bindir}/setup-neutron
 
 %changelog
+* Mon Sep 29 2014 James Slagle <jslagle@redhat.com> 0.1.10-1
+- Update to upstream 0.1.10
+
 * Fri Sep 12 2014 James Slagle <jslagle@redhat.com> - 0.1.9-1
 - Setup for rdopkg
 - Bump to 0.1.9
