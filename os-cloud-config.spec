@@ -7,8 +7,6 @@ License:		ASL 2.0
 URL:			http://pypi.python.org/pypi/%{name}
 Source0:		http://tarballs.openstack.org/%{name}/%{name}-%{version}.tar.gz
 
-Patch0001: 0001-Do-not-create-the-_member_-role.patch
-
 BuildArch:		noarch
 BuildRequires:		python-setuptools
 BuildRequires:		python2-devel
@@ -30,12 +28,6 @@ configuration of OpenStack clouds.
 
 %prep
 %setup -q -n %{name}-%{version}
-
-%patch0001 -p1
-
-#
-# patches_base: 0.1.9
-#
 
 %build
 %{__python} setup.py build
