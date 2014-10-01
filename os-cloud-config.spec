@@ -1,6 +1,6 @@
 Name:			os-cloud-config
 Version:		0.1.10
-Release:		1%{?dist}
+Release:		2%{?dist}
 Summary:		Configuration for OpenStack clouds
 
 License:		ASL 2.0
@@ -54,6 +54,9 @@ configuration of OpenStack clouds.
 %{_bindir}/setup-neutron
 
 %changelog
+* Mon Sep 29 2014 James Slagle <jslagle@redhat.com> 0.1.10-2
+- Remove Requires on python-ironicclient
+
 * Mon Sep 29 2014 James Slagle <jslagle@redhat.com> 0.1.10-1
 - Update to upstream 0.1.10
 
