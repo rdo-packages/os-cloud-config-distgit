@@ -1,5 +1,5 @@
 Name:			os-cloud-config
-Version:		0.1.11
+Version:		0.1.13
 Release:		1%{?dist}
 Summary:		Configuration for OpenStack clouds
 
@@ -46,6 +46,9 @@ configuration of OpenStack clouds.
 %{_bindir}/setup-neutron
 
 %changelog
+* Tue Oct 28 2014 James Slagle <jslagle@redhat.com> 0.1.13-1
+- Update to upstream 0.1.13
+
 * Wed Oct 01 2014 James Slagle <jslagle@redhat.com> 0.1.11-1
 - Update to upstream 0.1.11
 
