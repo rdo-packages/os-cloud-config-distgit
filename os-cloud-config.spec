@@ -1,6 +1,6 @@
 Name:			os-cloud-config
 Version:		0.1.13
-Release:		2%{?dist}
+Release:		3%{?dist}
 Summary:		Configuration for OpenStack clouds
 
 License:		ASL 2.0
@@ -50,6 +50,9 @@ configuration of OpenStack clouds.
 %{_bindir}/setup-neutron
 
 %changelog
+* Tue Jan 06 2015 James Slagle <jslagle@redhat.com> 0.1.13-3
+- Update Remove runtime dependency on pbr patch
+
 * Tue Jan 06 2015 James Slagle <jslagle@redhat.com> 0.1.13-2
 - Remove runtime dependency on pbr
 
