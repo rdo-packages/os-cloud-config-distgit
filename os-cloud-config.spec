@@ -1,11 +1,13 @@
 Name:			os-cloud-config
 Version:		0.1.13
-Release:		1%{?dist}
+Release:		2%{?dist}
 Summary:		Configuration for OpenStack clouds
 
 License:		ASL 2.0
 URL:			http://pypi.python.org/pypi/%{name}
 Source0:		http://tarballs.openstack.org/%{name}/%{name}-%{version}.tar.gz
+
+Patch0001: 0001-Remove-runtime-dependency-on-pbr.patch
 
 BuildArch:		noarch
 BuildRequires:		python-setuptools
@@ -29,6 +31,8 @@ configuration of OpenStack clouds.
 %prep
 %setup -q -n %{name}-%{version}
 
+%patch0001 -p1
+
 %build
 %{__python} setup.py build
 
@@ -46,6 +50,9 @@ configuration of OpenStack clouds.
 %{_bindir}/setup-neutron
 
 %changelog
+* Tue Jan 06 2015 James Slagle <jslagle@redhat.com> 0.1.13-2
+- Remove runtime dependency on pbr
+
 * Tue Oct 28 2014 James Slagle <jslagle@redhat.com> 0.1.13-1
 - Update to upstream 0.1.13
 
