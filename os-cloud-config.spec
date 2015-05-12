@@ -1,13 +1,20 @@
 Name:			os-cloud-config
-Version:		0.1.13
-Release:		3%{?dist}
+Version:		0.2.6
+Release:		1%{?dist}
 Summary:		Configuration for OpenStack clouds
 
 License:		ASL 2.0
 URL:			http://pypi.python.org/pypi/%{name}
 Source0:		http://tarballs.openstack.org/%{name}/%{name}-%{version}.tar.gz
 
-Patch0001: 0001-Remove-runtime-dependency-on-pbr.patch
+#
+# patches_base=+1
+#
+
+Patch0001: 0001-Set-kernel-and-ramdisk-ID-for-ironic-nodes.patch
+Patch0002: 0002-Clean-up-usage.rst.patch
+Patch0003: 0003-Add-pxe_drac-driver-support-to-os-cloud-config.patch
+Patch0004: 0004-Updated-from-global-requirements.patch
 
 BuildArch:		noarch
 BuildRequires:		python-setuptools
@@ -32,6 +39,9 @@ configuration of OpenStack clouds.
 %setup -q -n %{name}-%{version}
 
 %patch0001 -p1
+%patch0002 -p1
+%patch0003 -p1
+%patch0004 -p1
 
 %build
 %{__python} setup.py build
@@ -48,8 +58,14 @@ configuration of OpenStack clouds.
 %{_bindir}/register-nodes
 %{_bindir}/setup-endpoints
 %{_bindir}/setup-neutron
+%{_bindir}/init-keystone-heat-domain
+%{_bindir}/setup-flavors
+%{_bindir}/upload-kernel-ramdisk
 
 %changelog
+* Fri May 08 2015 Mike Burns <mburns@redhat.com> 0.2.6-1
+- Update to upstream 0.2.6
+
 * Tue Jan 06 2015 James Slagle <jslagle@redhat.com> 0.1.13-3
 - Update Remove runtime dependency on pbr patch
 

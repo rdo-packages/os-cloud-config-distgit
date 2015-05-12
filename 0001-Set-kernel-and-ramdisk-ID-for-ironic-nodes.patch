@@ -1,0 +1,280 @@
+From d9f8c30393aab59097ebc41e1262e84490338b0e Mon Sep 17 00:00:00 2001
+From: Clint Byrum <clint@fewbar.com>
+Date: Thu, 11 Dec 2014 15:46:34 -0800
+Subject: [PATCH] Set kernel and ramdisk ID for ironic nodes
+
+Ironic has deprecated per-flavor ramdisk and kernel image IDs in favor
+of setting them per-node. These parameters are optional to preserve
+backward compatibility. For ease of use, the command line client takes
+the kernel and ramdisk name and looks up the ID via glance. Also, they
+are completely ignored on nova-bm since it does not have a per-node
+setting for these ids.
+
+Co-Authored-By: Steve Kowalik <steven@wedontsleep.org>
+
+Change-Id: I702afe81038b6f962ce383edb58227a6015c2a75
+Partial-Bug: #1401617
+---
+ os_cloud_config/cmd/register_nodes.py            | 11 +++++-
+ os_cloud_config/cmd/tests/test_register_nodes.py | 23 ++++++++---
+ os_cloud_config/nodes.py                         | 28 ++++++++++++--
+ os_cloud_config/tests/test_nodes.py              | 49 +++++++++++++++++++++---
+ 4 files changed, 96 insertions(+), 15 deletions(-)
+
+diff --git a/os_cloud_config/cmd/register_nodes.py b/os_cloud_config/cmd/register_nodes.py
+index 20b0654..2ff1d03 100644
+--- a/os_cloud_config/cmd/register_nodes.py
++++ b/os_cloud_config/cmd/register_nodes.py
+@@ -50,6 +50,12 @@ def parse_args():
+     parser.add_argument('-r', '--remove', dest='remove', action='store_true',
+                         help='Remove all unspecified nodes from the baremetal '
+                         'service. Use with extreme caution!')
++    parser.add_argument('-k', '--kernel-name', dest='kernel_name',
++                        help='Default kernel name (in Glance) for nodes that '
++                             'do not specify one.')
++    parser.add_argument('-d', '--ramdisk-name', dest='ramdisk_name',
++                        help='Default ramdisk name (in Glance) for nodes that '
++                             'do not specify one.')
+     environment._add_logging_arguments(parser)
+     return parser.parse_args()
+
+@@ -64,6 +70,7 @@ def main():
+         environment._ensure()
+
+         keystone_client = _clients.get_keystone_client()
++        glance_client = _clients.get_glance_client()
+         if nodes.using_ironic(keystone=keystone_client):
+             client = _clients.get_ironic_client()
+         else:
+@@ -71,7 +78,9 @@ def main():
+
+         nodes.register_all_nodes(
+             args.service_host, nodes_list, client=client, remove=args.remove,
+-            blocking=True, keystone_client=keystone_client)
++            blocking=True, keystone_client=keystone_client,
++            glance_client=glance_client, kernel_name=args.kernel_name,
++            ramdisk_name=args.ramdisk_name)
+     except Exception:
+         logging.exception("Unexpected error during command execution")
+         return 1
+diff --git a/os_cloud_config/cmd/tests/test_register_nodes.py b/os_cloud_config/cmd/tests/test_register_nodes.py
+index d3f95a5..fb41fc5 100644
+--- a/os_cloud_config/cmd/tests/test_register_nodes.py
++++ b/os_cloud_config/cmd/tests/test_register_nodes.py
+@@ -24,6 +24,8 @@ from os_cloud_config.tests import base
+
+ class RegisterNodesTest(base.TestCase):
+
++    @mock.patch('os_cloud_config.cmd.utils._clients.get_glance_client',
++                return_value='glance_client_mock')
+     @mock.patch('os_cloud_config.cmd.utils._clients.get_nova_bm_client',
+                 return_value='nova_bm_client_mock')
+     @mock.patch('os_cloud_config.cmd.utils._clients.get_keystone_client',
+@@ -37,7 +39,8 @@ class RegisterNodesTest(base.TestCase):
+     def test_with_arguments_nova_baremetal(self, register_mock,
+                                            using_ironic_mock,
+                                            get_keystone_client_mock,
+-                                           get_nova_bm_client_mock):
++                                           get_nova_bm_client_mock,
++                                           get_glance_client_mock):
+         with tempfile.NamedTemporaryFile() as f:
+             f.write(u'{}\n'.encode('utf-8'))
+             f.flush()
+@@ -46,14 +49,19 @@ class RegisterNodesTest(base.TestCase):
+
+         register_mock.assert_called_once_with(
+             "seed", {}, client='nova_bm_client_mock', remove=False,
+-            blocking=True, keystone_client='keystone_client_mock')
++            blocking=True, keystone_client='keystone_client_mock',
++            glance_client='glance_client_mock', kernel_name=None,
++            ramdisk_name=None)
+         using_ironic_mock.assert_called_once_with(
+             keystone='keystone_client_mock')
+         get_keystone_client_mock.assert_called_once_with()
+         get_nova_bm_client_mock.assert_called_once_with()
++        get_glance_client_mock.assert_called_once_with()
+
+         self.assertEqual(0, return_code)
+
++    @mock.patch('os_cloud_config.cmd.utils._clients.get_glance_client',
++                return_value='glance_client_mock')
+     @mock.patch('os_cloud_config.cmd.utils._clients.get_ironic_client',
+                 return_value='ironic_client_mock')
+     @mock.patch('os_cloud_config.cmd.utils._clients.get_keystone_client',
+@@ -63,11 +71,13 @@ class RegisterNodesTest(base.TestCase):
+     @mock.patch.dict('os.environ', {'OS_USERNAME': 'a', 'OS_PASSWORD': 'a',
+                      'OS_TENANT_NAME': 'a', 'OS_AUTH_URL': 'a'})
+     @mock.patch.object(sys, 'argv', ['register-nodes', '--service-host',
+-                       'seed', '--nodes'])
++                                     'seed', '--ramdisk-name', 'bm-ramdisk',
++                                     '--kernel-name', 'bm-kernel', '--nodes'])
+     def test_with_arguments_ironic(self, register_mock,
+                                    using_ironic_mock,
+                                    get_keystone_client_mock,
+-                                   get_ironic_client_mock):
++                                   get_ironic_client_mock,
++                                   get_glance_client_mock):
+         with tempfile.NamedTemporaryFile() as f:
+             f.write(u'{}\n'.encode('utf-8'))
+             f.flush()
+@@ -76,11 +86,14 @@ class RegisterNodesTest(base.TestCase):
+
+         register_mock.assert_called_once_with(
+             "seed", {}, client='ironic_client_mock', remove=False,
+-            blocking=True, keystone_client='keystone_client_mock')
++            blocking=True, keystone_client='keystone_client_mock',
++            glance_client='glance_client_mock',
++            kernel_name='bm-kernel', ramdisk_name='bm-ramdisk')
+         using_ironic_mock.assert_called_once_with(
+             keystone='keystone_client_mock')
+         get_keystone_client_mock.assert_called_once_with()
+         get_ironic_client_mock.assert_called_once_with()
++        get_glance_client_mock.assert_called_once_with()
+
+         self.assertEqual(0, return_code)
+
+diff --git a/os_cloud_config/nodes.py b/os_cloud_config/nodes.py
+index c5d2cd0..96beab5 100644
+--- a/os_cloud_config/nodes.py
++++ b/os_cloud_config/nodes.py
+@@ -21,6 +21,7 @@ from novaclient.openstack.common.apiclient import exceptions as novaexc
+ import six
+
+ from os_cloud_config.cmd.utils import _clients as clients
++from os_cloud_config import glance
+
+ LOG = logging.getLogger(__name__)
+
+@@ -92,6 +93,11 @@ def _extract_driver_info(node):
+             driver_info["iboot_port"] = node["pm_port"]
+     else:
+         raise ValueError("Unknown pm_type: %s" % node["pm_type"])
++    if "pxe" in node["pm_type"]:
++        if "kernel_id" in node:
++            driver_info["pxe_deploy_kernel"] = node["kernel_id"]
++        if "ramdisk_id" in node:
++            driver_info["pxe_deploy_ramdisk"] = node["ramdisk_id"]
+     return driver_info
+
+
+@@ -249,9 +255,15 @@ def _clean_up_extra_nodes(ironic_in_use, seen, client, remove=False):
+
+
+ def _register_list_of_nodes(register_func, node_map, client, nodes_list,
+-                            blocking, service_host):
++                            blocking, service_host, kernel_id, ramdisk_id):
+     seen = set()
+     for node in nodes_list:
++        if kernel_id:
++            if 'kernel_id' not in node:
++                node['kernel_id'] = kernel_id
++        if ramdisk_id:
++            if 'ramdisk_id' not in node:
++                node['ramdisk_id'] = ramdisk_id
+         try:
+             new_node = register_func(service_host, node, node_map,
+                                      client=client, blocking=blocking)
+@@ -263,7 +275,8 @@ def _register_list_of_nodes(register_func, node_map, client, nodes_list,
+
+
+ def register_all_nodes(service_host, nodes_list, client=None, remove=False,
+-                       blocking=True, keystone_client=None):
++                       blocking=True, keystone_client=None, glance_client=None,
++                       kernel_name=None, ramdisk_name=None):
+     LOG.debug('Registering all nodes.')
+     ironic_in_use = using_ironic(keystone=keystone_client)
+     if ironic_in_use:
+@@ -279,8 +292,17 @@ def register_all_nodes(service_host, nodes_list, client=None, remove=False,
+             client = clients.get_nova_bm_client()
+         register_func = _update_or_register_bm_node
+     node_map = _populate_node_mapping(ironic_in_use, client)
++    glance_ids = {'kernel': None, 'ramdisk': None}
++    if kernel_name and ramdisk_name:
++        if glance_client is None:
++            LOG.warn('Creating glance client inline is deprecated, please '
++                     'pass the client as a parameter.')
++            client = clients.get_glance_client()
++        glance_ids = glance.create_or_find_kernel_and_ramdisk(
++            glance_client, kernel_name, ramdisk_name)
+     seen = _register_list_of_nodes(register_func, node_map, client,
+-                                   nodes_list, blocking, service_host)
++                                   nodes_list, blocking, service_host,
++                                   glance_ids['kernel'], glance_ids['ramdisk'])
+     _clean_up_extra_nodes(ironic_in_use, seen, client, remove=remove)
+
+
+diff --git a/os_cloud_config/tests/test_nodes.py b/os_cloud_config/tests/test_nodes.py
+index 72a51aa..101e0db 100644
+--- a/os_cloud_config/tests/test_nodes.py
++++ b/os_cloud_config/tests/test_nodes.py
+@@ -49,7 +49,8 @@ class NodesTest(base.TestCase):
+         register_func = mock.MagicMock()
+         register_func.side_effect = [return_node, ironicexp.Conflict]
+         seen = nodes._register_list_of_nodes(register_func, {}, None,
+-                                             nodes_list, False, 'servicehost')
++                                             nodes_list, False, 'servicehost',
++                                             None, None)
+         self.assertEqual(seen, set(nodes_list))
+
+     @mock.patch('time.sleep')
+@@ -186,12 +187,16 @@ class NodesTest(base.TestCase):
+                     "iboot_port": "8080"}
+         self.assertEqual(expected, nodes._extract_driver_info(node))
+
+-    def test_extract_driver_info_pxe_ilo(self):
++    def test_extract_driver_info_pxe_ipmi_with_kernel_ramdisk(self):
+         node = self._get_node()
+-        node["pm_type"] = "pxe_ilo"
+-        expected = {"ilo_address": "foo.bar",
+-                    "ilo_username": "test",
+-                    "ilo_password": "random"}
++        node["pm_type"] = "pxe_ipmi"
++        node["kernel_id"] = "kernel-abc"
++        node["ramdisk_id"] = "ramdisk-foo"
++        expected = {"ipmi_address": "foo.bar",
++                    "ipmi_username": "test",
++                    "ipmi_password": "random",
++                    "pxe_deploy_kernel": "kernel-abc",
++                    "pxe_deploy_ramdisk": "ramdisk-foo"}
+         self.assertEqual(expected, nodes._extract_driver_info(node))
+
+     def test_extract_driver_info_unknown_type(self):
+@@ -223,6 +228,38 @@ class NodesTest(base.TestCase):
+         ironic.port.create.assert_has_calls([port_call])
+         ironic.node.set_power_state.assert_has_calls([power_off_call])
+
++    @mock.patch('os_cloud_config.nodes.using_ironic', return_value=True)
++    def test_register_all_nodes_ironic_kernel_ramdisk(self, using_ironic):
++        node_list = [self._get_node()]
++        node_properties = {"cpus": "1",
++                           "memory_mb": "2048",
++                           "local_gb": "30",
++                           "cpu_arch": "amd64"}
++        ironic = mock.MagicMock()
++        glance = mock.MagicMock()
++        image = collections.namedtuple('image', ['id'])
++        glance.images.find.side_effect = (image('kernel-123'),
++                                          image('ramdisk-999'))
++        nodes.register_all_nodes('servicehost', node_list, client=ironic,
++                                 glance_client=glance, kernel_name='bm-kernel',
++                                 ramdisk_name='bm-ramdisk')
++        pxe_node_driver_info = {"ssh_address": "foo.bar",
++                                "ssh_username": "test",
++                                "ssh_key_contents": "random",
++                                "ssh_virt_type": "virsh",
++                                "pxe_deploy_kernel": "kernel-123",
++                                "pxe_deploy_ramdisk": "ramdisk-999"}
++        pxe_node = mock.call(driver="pxe_ssh",
++                             driver_info=pxe_node_driver_info,
++                             properties=node_properties)
++        port_call = mock.call(node_uuid=ironic.node.create.return_value.uuid,
++                              address='aaa')
++        power_off_call = mock.call(ironic.node.create.return_value.uuid, 'off')
++        using_ironic.assert_called_once_with(keystone=None)
++        ironic.node.create.assert_has_calls([pxe_node, mock.ANY])
++        ironic.port.create.assert_has_calls([port_call])
++        ironic.node.set_power_state.assert_has_calls([power_off_call])
++
+     @mock.patch('time.sleep')
+     def test_register_ironic_node_retry(self, sleep):
+         ironic = mock.MagicMock()
