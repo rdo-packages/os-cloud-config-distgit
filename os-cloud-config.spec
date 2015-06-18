@@ -1,6 +1,6 @@
 Name:			os-cloud-config
 Version:		0.2.6
-Release:		1%{?dist}
+Release:		2%{?dist}
 Summary:		Configuration for OpenStack clouds
 
 License:		ASL 2.0
@@ -63,6 +63,9 @@ configuration of OpenStack clouds.
 %{_bindir}/upload-kernel-ramdisk
 
 %changelog
+* Thu Jun 18 2015 Fedora Release Engineering <rel-eng@lists.fedoraproject.org> - 0.2.6-2
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_23_Mass_Rebuild
+
 * Fri May 08 2015 Mike Burns <mburns@redhat.com> 0.2.6-1
 - Update to upstream 0.2.6
 
