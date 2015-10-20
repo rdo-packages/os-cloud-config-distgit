@@ -1,6 +1,6 @@
 Name:			os-cloud-config
 Version:		0.2.10
-Release:		1%{?dist}
+Release:		2%{?dist}
 Summary:		Configuration for OpenStack clouds
 
 License:		ASL 2.0
@@ -12,6 +12,7 @@ BuildRequires:		python-setuptools
 BuildRequires:		python2-devel
 BuildRequires:		python-pbr
 
+Requires:		python-pbr
 Requires:		python-setuptools
 Requires:		python-argparse
 Requires:		python-oslo-config
@@ -50,6 +51,9 @@ configuration of OpenStack clouds.
 %{_bindir}/upload-kernel-ramdisk
 
 %changelog
+* Tue Oct 20 2015 James Slagle <jslagle@redhat.com> 0.2.10-2
+- Add Requires: python-pbr
+
 * Tue Oct 20 2015 James Slagle <jslagle@redhat.com> 0.2.10-1
 - Update to upstream 0.2.10
 
