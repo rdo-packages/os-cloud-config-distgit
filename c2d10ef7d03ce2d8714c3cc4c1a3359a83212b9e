@@ -16,6 +16,24 @@
       "revId": "c2d10ef7d03ce2d8714c3cc4c1a3359a83212b9e",
       "serverId": "270e2033-b340-4cff-9539-693957ebf0e7",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "dabed58f_f25db949",
+        "filename": "os-cloud-config.spec",
+        "patchSetId": 2
+      },
+      "lineNbr": 32,
+      "author": {
+        "id": 127
+      },
+      "writtenOn": "2016-05-25T13:01:27Z",
+      "side": 1,
+      "message": "yep missed that, and upstream_version is not defined either so using version",
+      "parentUuid": "dabed58f_12ff2d36",
+      "revId": "c2d10ef7d03ce2d8714c3cc4c1a3359a83212b9e",
+      "serverId": "270e2033-b340-4cff-9539-693957ebf0e7",
+      "unresolved": false
     }
   ]
 }
