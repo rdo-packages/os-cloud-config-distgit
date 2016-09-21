@@ -15,7 +15,6 @@ BuildRequires:		python-pbr
 BuildRequires:		git
 
 Requires:		python-setuptools
-Requires:		python-argparse
 Requires:		python-oslo-config
 Requires:		python-babel
 Requires:		python-keystoneclient
