@@ -1,18 +1,13 @@
-%global milestone .0b3
 %{!?upstream_version: %global upstream_version %{version}%{?milestone}}
 
 Name:			os-cloud-config
 Version:		5.0.0
-Release:		0.1%{?milestone}%{?dist}
+Release:		1%{?dist}
 Summary:		Configuration for OpenStack clouds
 
 License:		ASL 2.0
 URL:			http://pypi.python.org/pypi/%{name}
 Source0:		https://tarballs.openstack.org/%{name}/%{name}-%{upstream_version}.tar.gz
-
-#
-# patches_base=5.0.0.0b3
-#
 
 BuildArch:		noarch
 BuildRequires:		python-setuptools
@@ -57,6 +52,9 @@ configuration of OpenStack clouds.
 %{_bindir}/upload-kernel-ramdisk
 
 %changelog
+* Thu Oct 06 2016 Haikel Guemar <hguemar@fedoraproject.org> 5.0.0-1
+- Update to 5.0.0
+
 * Wed Sep 14 2016 Haikel Guemar <hguemar@fedoraproject.org> 5.0.0-0.1
 - Update to 5.0.0.0b3
 
