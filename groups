@@ -1,6 +1,6 @@
 # UUID                                  	Group Name
 #
 26c72c8227c2aa35cdce4c0157d70eefbedf1c9c	openstack/os-cloud-config-distgit-core
-9a175a82f309e8b4fd245e2c3e28cd1ae5f36e12	openstack/os-cloud-config-distgit-ptl
 63673ea7f2ae6a5666566b1ea9f14e473d00f5a9	rdo-core
+9a175a82f309e8b4fd245e2c3e28cd1ae5f36e12	openstack/os-cloud-config-distgit-ptl
 global:Registered-Users                 	Registered Users
