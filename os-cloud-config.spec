@@ -20,9 +20,12 @@ Requires:		python-babel
 Requires:		python-keystoneclient
 Requires:		python-novaclient
 Requires:		python-pbr
-# Add Back Requires on python-ironicclient once it's actually available
-# Requires:		python-ironicclient
+Requires:		python-ironicclient >= 1.9.0
 Requires:		pyOpenSSL
+Requires:               python-oslo-i18n >= 2.1.0
+Requires:               python-glanceclient >= 2.5.0
+Requires:               python-neutronclient >= 5.1.0
+Requires:               python-six
 
 %description
 os-cloud-config offers a suite of tools and libraries used to do the initial
