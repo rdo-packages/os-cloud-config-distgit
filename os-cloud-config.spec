@@ -54,3 +54,4 @@ configuration of OpenStack clouds.
 %{_bindir}/upload-kernel-ramdisk
 
 %changelog
+# REMOVEME: error caused by commit http://git.openstack.org/cgit/openstack/os-cloud-config/commit/?id=8cbab5ceeeae52363ea8c5188b8a0604cc420e34
