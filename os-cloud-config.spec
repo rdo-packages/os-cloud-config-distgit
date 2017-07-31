@@ -14,7 +14,6 @@ BuildRequires:		python2-devel
 BuildRequires:		python-pbr
 BuildRequires:		git
 
-Requires:		python-setuptools
 Requires:		python-oslo-config
 Requires:		python-babel
 Requires:		python-keystoneclient
